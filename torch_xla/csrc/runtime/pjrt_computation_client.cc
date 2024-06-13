@@ -25,6 +25,7 @@
 #include "xla/client/xla_computation.h"
 #include "xla/layout_util.h"
 #include "xla/literal.h"
+#include "xla/pjrt/pjrt_c_api_client.h"
 #include "xla/pjrt/pjrt_client.h"
 #include "xla/pjrt/pjrt_executable.h"
 #include "xla/protobuf_util.h"
@@ -631,8 +632,7 @@ std::vector<ComputationClient::ComputationPtr> PjRtComputationClient::Compile(
       TF_VLOG(3) << "memory usage is not availiable";
     }
 
-    const auto& hlo_modules =
-        ConsumeValueNoStackDump(executable->GetHloModules());
+    const auto& hlo_modules = ConsumeValue(executable->GetHloModules());
     xla::HloComputation* hlo_computation = hlo_modules[0]->entry_computation();
     std::shared_ptr<PjRtComputation> pjrt_computation =
         std::make_shared<PjRtComputation>(
@@ -983,6 +983,15 @@ ComputationClient::MemoryInfo PjRtComputationClient::GetMemoryInfo(
       stats.bytes_in_use,
       *stats.bytes_limit,
   };
+}
+
+const PJRT_Api* PjRtComputationClient::GetPjRtCApiIfAvailable() const {
+  // dynamic_cast will return a nullptr if the client is not PjRtCApiClient.
+  auto* c_api_client = dynamic_cast<xla::PjRtCApiClient*>(client_.get());
+  if (c_api_client) {
+    return c_api_client->pjrt_c_api();
+  }
+  return nullptr;
 }
 
 }  // namespace runtime
