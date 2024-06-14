@@ -70,6 +70,11 @@ source ~/.bashrc
 ```
 
 ### Wheel
+
+> **_NOTE:_**  The wheel file is only compatible with x86_64 linux based architecture. You can check the architecutere of your linux system through the following command:
+```
+uname -a
+```
 ```
 pip3 install torch==2.3.0
 # GPU whl for python 3.10 + cuda 12.1
